@@ -1,0 +1,1421 @@
+{
+  "datasets": [
+    {
+      "name": "trips_data",
+      "displayName": "Transportation Trips Data",
+      "config": {
+        "version": "1.1",
+        "source": "transportation.gold.fact_trips",
+        "dimensions": [
+          {
+            "name": "city_name",
+            "expr": "CASE city_name\n  WHEN 'Jaipur' THEN 'West'\n  WHEN 'Surat' THEN 'Southwest'\n  WHEN 'Indore' THEN 'Midwest'\n  WHEN 'Coimbatore' THEN 'South'\n  WHEN 'Lucknow' THEN 'Northeast'\n  WHEN 'Kochi' THEN 'Southeast'\n  WHEN 'Visakhapatnam' THEN 'East'\n  WHEN 'Mysore' THEN 'Pacific'\n  WHEN 'Chandigarh' THEN 'Mid-Atlantic'\n  ELSE 'Central'\nEND"
+          },
+          {
+            "name": "business_date",
+            "expr": "business_date"
+          },
+          {
+            "name": "passenger_category",
+            "expr": "passenger_category"
+          },
+          {
+            "name": "day_of_week",
+            "expr": "day_of_week"
+          },
+          {
+            "name": "month_year",
+            "expr": "month_year"
+          },
+          {
+            "name": "driver_rating",
+            "expr": "driver_rating"
+          },
+          {
+            "name": "passenger_rating",
+            "expr": "passenger_rating"
+          },
+          {
+            "name": "day_type",
+            "expr": "CASE WHEN is_weekend THEN 'Weekend' ELSE 'Weekday' END"
+          },
+          {
+            "name": "holiday_type",
+            "expr": "CASE WHEN national_holiday THEN 'Holiday' ELSE 'Non-Holiday' END"
+          }
+        ],
+        "measures": [
+          {
+            "name": "trip_count",
+            "expr": "COUNT(*)"
+          },
+          {
+            "name": "total_revenue",
+            "expr": "SUM(sales_amt) * 0.012",
+            "format": {
+              "type": "currency",
+              "currencyCode": "USD",
+              "decimalPlaces": {
+                "type": "exact",
+                "places": 0.0
+              }
+            }
+          },
+          {
+            "name": "avg_distance",
+            "expr": "AVG(distance_kms) * 0.621371"
+          },
+          {
+            "name": "avg_passenger_rating",
+            "expr": "AVG(passenger_rating)"
+          },
+          {
+            "name": "avg_driver_rating",
+            "expr": "AVG(driver_rating)"
+          },
+          {
+            "name": "avg_revenue",
+            "expr": "AVG(sales_amt) * 0.012"
+          }
+        ]
+      }
+    },
+    {
+      "name": "top_cities",
+      "displayName": "Top 10 Cities by Trip Count",
+      "config": {
+        "version": "1.1",
+        "source": "SELECT\n  CASE city_name\n    WHEN 'Jaipur' THEN 'West'\n    WHEN 'Surat' THEN 'Southwest'\n    WHEN 'Indore' THEN 'Midwest'\n    WHEN 'Coimbatore' THEN 'South'\n    WHEN 'Lucknow' THEN 'Northeast'\n    WHEN 'Kochi' THEN 'Southeast'\n    WHEN 'Visakhapatnam' THEN 'East'\n    WHEN 'Mysore' THEN 'Pacific'\n    WHEN 'Chandigarh' THEN 'Mid-Atlantic'\n    ELSE 'Central'\n  END AS city_name,\n  COUNT(*) AS trip_count\nFROM transportation.gold.fact_trips\nGROUP BY\n  CASE city_name\n    WHEN 'Jaipur' THEN 'West'\n    WHEN 'Surat' THEN 'Southwest'\n    WHEN 'Indore' THEN 'Midwest'\n    WHEN 'Coimbatore' THEN 'South'\n    WHEN 'Lucknow' THEN 'Northeast'\n    WHEN 'Kochi' THEN 'Southeast'\n    WHEN 'Visakhapatnam' THEN 'East'\n    WHEN 'Mysore' THEN 'Pacific'\n    WHEN 'Chandigarh' THEN 'Mid-Atlantic'\n    ELSE 'Central'\n  END\nORDER BY trip_count DESC\nLIMIT 10",
+        "dimensions": [
+          {
+            "name": "city_name",
+            "expr": "city_name"
+          }
+        ],
+        "measures": [
+          {
+            "name": "trip_count",
+            "expr": "SUM(trip_count)"
+          }
+        ]
+      }
+    },
+    {
+      "name": "dim_city",
+      "displayName": "City Dimension",
+      "config": {
+        "version": "1.1",
+        "source": "transportation.silver.city",
+        "dimensions": [
+          {
+            "name": "city_id",
+            "expr": "city_id"
+          },
+          {
+            "name": "city_name",
+            "expr": "CASE city_name\n  WHEN 'Jaipur' THEN 'West'\n  WHEN 'Surat' THEN 'Southwest'\n  WHEN 'Indore' THEN 'Midwest'\n  WHEN 'Coimbatore' THEN 'South'\n  WHEN 'Lucknow' THEN 'Northeast'\n  WHEN 'Kochi' THEN 'Southeast'\n  WHEN 'Visakhapatnam' THEN 'East'\n  WHEN 'Mysore' THEN 'Pacific'\n  WHEN 'Chandigarh' THEN 'Mid-Atlantic'\n  ELSE 'Central'\nEND"
+          }
+        ]
+      }
+    },
+    {
+      "name": "dim_calendar",
+      "displayName": "Calendar Dimension",
+      "config": {
+        "version": "1.1",
+        "source": "transportation.silver.calendar",
+        "dimensions": [
+          {
+            "name": "date",
+            "expr": "date"
+          },
+          {
+            "name": "holiday_name",
+            "expr": "holiday_name"
+          },
+          {
+            "name": "is_holiday",
+            "expr": "is_holiday"
+          },
+          {
+            "name": "day_of_week_abbr",
+            "expr": "day_of_week_abbr"
+          },
+          {
+            "name": "month_name",
+            "expr": "month_name"
+          },
+          {
+            "name": "quarter",
+            "expr": "quarter"
+          },
+          {
+            "name": "year",
+            "expr": "year"
+          }
+        ]
+      }
+    }
+  ],
+  "relationshipGraphs": [
+    {
+      "sources": [
+        {
+          "name": "Transportation_Trips_Data",
+          "datasetName": "trips_data"
+        },
+        {
+          "name": "Top_10_Cities_by_Trip_Count",
+          "datasetName": "top_cities"
+        },
+        {
+          "name": "City_Dimension",
+          "datasetName": "dim_city"
+        },
+        {
+          "name": "Calendar_Dimension",
+          "datasetName": "dim_calendar"
+        }
+      ],
+      "relationships": [
+        {
+          "name": "relationship_0",
+          "from": "Transportation_Trips_Data",
+          "to": "Calendar_Dimension",
+          "on": "`Transportation_Trips_Data`.`business_date` = `Calendar_Dimension`.`date`",
+          "cardinality": "CARDINALITY_MANY_TO_ONE"
+        },
+        {
+          "name": "relationship_1",
+          "from": "Transportation_Trips_Data",
+          "to": "City_Dimension",
+          "on": "`Transportation_Trips_Data`.`city_id` = `City_Dimension`.`city_id`",
+          "cardinality": "CARDINALITY_MANY_TO_ONE"
+        }
+      ],
+      "measureExpressions": [
+        {
+          "name": "revenue_per_holiday",
+          "expression": "MEASURE(`Transportation_Trips_Data`.`total_revenue`) / COUNT(`Calendar_Dimension`.`date`)"
+        },
+        {
+          "name": "trips_per_holiday",
+          "expression": "MEASURE(`Transportation_Trips_Data`.`trip_count`) / COUNT(`Calendar_Dimension`.`date`)"
+        }
+      ]
+    }
+  ],
+  "pages": [
+    {
+      "name": "d2217c74",
+      "displayName": "Overview",
+      "layout": [
+        {
+          "widget": {
+            "name": "total_trips",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "trips_data",
+                  "fields": [
+                    {
+                      "name": "measure(trip_count)",
+                      "expression": "MEASURE(`trip_count`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Total Trips"
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "measure(trip_count)",
+                  "rowNumber": 0
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 3,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "total_revenue",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "trips_data",
+                  "fields": [
+                    {
+                      "name": "measure(total_revenue)",
+                      "expression": "MEASURE(`total_revenue`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Total Revenue"
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "measure(total_revenue)",
+                  "rowNumber": 0
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 3,
+            "y": 0,
+            "width": 3,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "avg_distance",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "trips_data",
+                  "fields": [
+                    {
+                      "name": "measure(avg_distance)",
+                      "expression": "MEASURE(`avg_distance`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Avg Distance (km)"
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "measure(avg_distance)",
+                  "rowNumber": 0
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 0,
+            "width": 3,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "avg_passenger_rating",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "trips_data",
+                  "fields": [
+                    {
+                      "name": "measure(avg_passenger_rating)",
+                      "expression": "MEASURE(`avg_passenger_rating`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Avg Passenger Rating"
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "measure(avg_passenger_rating)",
+                  "rowNumber": 0
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 9,
+            "y": 0,
+            "width": 3,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "trip_volume_trend",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "trips_data",
+                  "fields": [
+                    {
+                      "name": "monthly(business_date)",
+                      "expression": "DATE_TRUNC(\"MONTH\", `business_date`)"
+                    },
+                    {
+                      "name": "measure(trip_count)",
+                      "expression": "MEASURE(`trip_count`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Trip Volume Trend"
+              },
+              "version": 3,
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "monthly(business_date)",
+                  "displayName": "Month",
+                  "scale": {
+                    "type": "temporal"
+                  }
+                },
+                "y": {
+                  "fieldName": "measure(trip_count)",
+                  "displayName": "trip_count",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 2,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "revenue_by_category",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "trips_data",
+                  "fields": [
+                    {
+                      "name": "measure(total_revenue)",
+                      "expression": "MEASURE(`total_revenue`)"
+                    },
+                    {
+                      "name": "passenger_category",
+                      "expression": "`passenger_category`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Revenue by Passenger Category"
+              },
+              "version": 3,
+              "widgetType": "pie",
+              "encodings": {
+                "angle": {
+                  "fieldName": "measure(total_revenue)",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "displayName": "total_revenue"
+                },
+                "color": {
+                  "fieldName": "passenger_category",
+                  "displayName": "passenger_category",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 8,
+            "width": 12,
+            "height": 5
+          }
+        },
+        {
+          "widget": {
+            "name": "revenue_by_city",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "trips_data",
+                  "fields": [
+                    {
+                      "name": "city_name",
+                      "expression": "`city_name`"
+                    },
+                    {
+                      "name": "measure(total_revenue)",
+                      "expression": "MEASURE(`total_revenue`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Revenue by City"
+              },
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "measure(total_revenue)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fieldName": "city_name",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "color": {
+                  "fieldName": "city_name",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 2,
+            "width": 6,
+            "height": 6
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    },
+    {
+      "name": "city_performance",
+      "displayName": "City & Performance Analysis",
+      "layout": [
+        {
+          "widget": {
+            "name": "revenue_by_dow",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "trips_data",
+                  "fields": [
+                    {
+                      "name": "day_of_week",
+                      "expression": "`day_of_week`"
+                    },
+                    {
+                      "name": "measure(total_revenue)",
+                      "expression": "MEASURE(`total_revenue`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Revenue by Day of Week"
+              },
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "day_of_week",
+                  "displayName": "day_of_week",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "measure(total_revenue)",
+                  "displayName": "total_revenue",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "day_of_week",
+                  "displayName": "day_of_week",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "weekend_vs_weekday",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "trips_data",
+                  "fields": [
+                    {
+                      "name": "day_type",
+                      "expression": "`day_type`"
+                    },
+                    {
+                      "name": "measure(total_revenue)",
+                      "expression": "MEASURE(`total_revenue`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Weekend vs Weekday Revenue"
+              },
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "day_type",
+                  "displayName": "day_type",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "measure(total_revenue)",
+                  "displayName": "total_revenue",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "day_type",
+                  "displayName": "day_type",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 0,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "top_cities",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "top_cities",
+                  "fields": [
+                    {
+                      "name": "city_name",
+                      "expression": "`city_name`"
+                    },
+                    {
+                      "name": "measure(trip_count)",
+                      "expression": "MEASURE(`trip_count`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Top 10 Cities by Trip Count"
+              },
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "city_name",
+                  "displayName": "city_name",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "measure(trip_count)",
+                  "displayName": "trip_count",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "city_name",
+                  "displayName": "city_name",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 6,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "holiday_vs_nonholiday",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "trips_data",
+                  "fields": [
+                    {
+                      "name": "holiday_type",
+                      "expression": "`holiday_type`"
+                    },
+                    {
+                      "name": "measure(avg_revenue)",
+                      "expression": "MEASURE(`avg_revenue`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Holiday vs Non-Holiday Avg Revenue"
+              },
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "holiday_type",
+                  "displayName": "holiday_type",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "measure(avg_revenue)",
+                  "displayName": "avg_revenue",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "holiday_type",
+                  "displayName": "holiday_type",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 6,
+            "width": 6,
+            "height": 6
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    },
+    {
+      "name": "ratings_quality",
+      "displayName": "Ratings & Quality",
+      "layout": [
+        {
+          "widget": {
+            "name": "driver_rating_dist",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "trips_data",
+                  "fields": [
+                    {
+                      "name": "driver_rating",
+                      "expression": "`driver_rating`"
+                    },
+                    {
+                      "name": "measure(trip_count)",
+                      "expression": "MEASURE(`trip_count`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Driver Rating Distribution"
+              },
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "driver_rating",
+                  "displayName": "driver_rating",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "measure(trip_count)",
+                  "displayName": "trip_count",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "driver_rating",
+                  "displayName": "driver_rating",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "passenger_rating_dist",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "trips_data",
+                  "fields": [
+                    {
+                      "name": "passenger_rating",
+                      "expression": "`passenger_rating`"
+                    },
+                    {
+                      "name": "measure(trip_count)",
+                      "expression": "MEASURE(`trip_count`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Passenger Rating Distribution"
+              },
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "passenger_rating",
+                  "displayName": "passenger_rating",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "measure(trip_count)",
+                  "displayName": "trip_count",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "passenger_rating",
+                  "displayName": "passenger_rating",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 0,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "avg_driver_rating_city",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "trips_data",
+                  "fields": [
+                    {
+                      "name": "city_name",
+                      "expression": "`city_name`"
+                    },
+                    {
+                      "name": "measure(avg_driver_rating)",
+                      "expression": "MEASURE(`avg_driver_rating`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Avg Driver Rating by City"
+              },
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "city_name",
+                  "displayName": "city_name",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "measure(avg_driver_rating)",
+                  "displayName": "avg_driver_rating",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "city_name",
+                  "displayName": "city_name",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 6,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "monthly_revenue_trend",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "trips_data",
+                  "fields": [
+                    {
+                      "name": "month_year",
+                      "expression": "`month_year`"
+                    },
+                    {
+                      "name": "measure(total_revenue)",
+                      "expression": "MEASURE(`total_revenue`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Monthly Revenue Trend"
+              },
+              "version": 3,
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "month_year",
+                  "displayName": "month_year",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "measure(total_revenue)",
+                  "displayName": "total_revenue",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "month_year",
+                  "displayName": "month_year",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 6,
+            "width": 6,
+            "height": 6
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    },
+    {
+      "name": "global_filters",
+      "displayName": "Global Filters",
+      "layout": [
+        {
+          "widget": {
+            "name": "city_filter",
+            "queries": [
+              {
+                "name": "dashboards/01f1b43683ec191da9db4a83b7bfa3a1/datasets/01f1b436cf3c1734ae1bb74f28b6f1ad_city_name",
+                "query": {
+                  "datasetName": "trips_data",
+                  "fields": [
+                    {
+                      "name": "city_name",
+                      "expression": "`city_name`"
+                    },
+                    {
+                      "name": "city_name_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "showTitle": true,
+                "title": "City Filter"
+              },
+              "widgetType": "filter-multi-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "city_name",
+                    "queryName": "dashboards/01f1b43683ec191da9db4a83b7bfa3a1/datasets/01f1b436cf3c1734ae1bb74f28b6f1ad_city_name"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 4,
+            "height": 2
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_GLOBAL_FILTERS",
+      "layoutVersion": "GRID_V1"
+    },
+    {
+      "name": "fact_dim_analysis",
+      "displayName": "Fact-Dimension Analysis",
+      "layout": [
+        {
+          "widget": {
+            "name": "revenue_by_holiday",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "fields": [
+                    {
+                      "name": "Calendar_Dimension__holiday_name",
+                      "expression": "`Calendar_Dimension`.`holiday_name`"
+                    },
+                    {
+                      "name": "measure(Transportation_Trips_Data__total_revenue)",
+                      "expression": "MEASURE(`Transportation_Trips_Data`.`total_revenue`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Revenue by Holiday Name"
+              },
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "Calendar_Dimension__holiday_name",
+                  "displayName": "Holiday Name",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "measure(Transportation_Trips_Data__total_revenue)",
+                  "displayName": "Total Revenue",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "Calendar_Dimension__holiday_name",
+                  "displayName": "Holiday Name",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "trips_by_dow_abbr",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "fields": [
+                    {
+                      "name": "Calendar_Dimension__day_of_week_abbr",
+                      "expression": "`Calendar_Dimension`.`day_of_week_abbr`"
+                    },
+                    {
+                      "name": "measure(Transportation_Trips_Data__trip_count)",
+                      "expression": "MEASURE(`Transportation_Trips_Data`.`trip_count`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Trips by Day of Week"
+              },
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "Calendar_Dimension__day_of_week_abbr",
+                  "displayName": "Day of Week",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "measure(Transportation_Trips_Data__trip_count)",
+                  "displayName": "Trip Count",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "Calendar_Dimension__day_of_week_abbr",
+                  "displayName": "Day of Week",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 0,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "revenue_per_holiday",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "fields": [
+                    {
+                      "name": "Calendar_Dimension__holiday_name",
+                      "expression": "`Calendar_Dimension`.`holiday_name`"
+                    },
+                    {
+                      "name": "measure(revenue_per_holiday)",
+                      "expression": "MEASURE(`revenue_per_holiday`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Revenue per Holiday Day"
+              },
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "Calendar_Dimension__holiday_name",
+                  "displayName": "Holiday Name",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "measure(revenue_per_holiday)",
+                  "displayName": "Revenue per Holiday Day",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "Calendar_Dimension__holiday_name",
+                  "displayName": "Holiday Name",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 6,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "fact_dim_table",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "fields": [
+                    {
+                      "name": "Transportation_Trips_Data__city_name",
+                      "expression": "`Transportation_Trips_Data`.`city_name`"
+                    },
+                    {
+                      "name": "Calendar_Dimension__holiday_name",
+                      "expression": "`Calendar_Dimension`.`holiday_name`"
+                    },
+                    {
+                      "name": "measure(Transportation_Trips_Data__trip_count)",
+                      "expression": "MEASURE(`Transportation_Trips_Data`.`trip_count`)"
+                    },
+                    {
+                      "name": "measure(Transportation_Trips_Data__total_revenue)",
+                      "expression": "MEASURE(`Transportation_Trips_Data`.`total_revenue`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "Trips by City & Holiday",
+                  "fields": []
+                }
+              },
+              "version": 2,
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "Transportation_Trips_Data__city_name",
+                    "headerAlignment": "left"
+                  },
+                  {
+                    "fieldName": "Calendar_Dimension__holiday_name",
+                    "headerAlignment": "left"
+                  },
+                  {
+                    "fieldName": "measure(Transportation_Trips_Data__trip_count)",
+                    "headerAlignment": "right"
+                  },
+                  {
+                    "fieldName": "measure(Transportation_Trips_Data__total_revenue)",
+                    "headerAlignment": "right"
+                  }
+                ]
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 6,
+            "width": 6,
+            "height": 6
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    }
+  ],
+  "uiSettings": {
+    "theme": {
+      "widgetHeaderAlignment": "ALIGNMENT_UNSPECIFIED"
+    },
+    "applyModeEnabled": false
+  }
+}
